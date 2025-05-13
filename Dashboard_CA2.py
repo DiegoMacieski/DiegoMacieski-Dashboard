@@ -52,7 +52,7 @@ if menu == "🎬 Task 1: MovieLens":
 
     st.plotly_chart(fig1)
 
- # 📊 Age
+ # Age
     st.subheader("📊 Age Distribution")
     fig2 = px.histogram(df, x='Age', nbins=10, title='User Age Distribution')
     st.plotly_chart(fig2)
@@ -62,7 +62,7 @@ if menu == "🎬 Task 1: MovieLens":
     fig3 = px.histogram(df, x='Rating', nbins=5, title='Movie Ratings')
     st.plotly_chart(fig3)
 
-    # 🎥 Top 10 Most Rated Movies
+    # Top 10 Most Rated Movies
     st.subheader("🎥 Top 10 Most Rated Movies")
     top_movies = df['Title'].value_counts().head(10).sort_values()
     fig4 = px.bar(x=top_movies.values, y=top_movies.index, orientation='h',
@@ -70,7 +70,7 @@ if menu == "🎬 Task 1: MovieLens":
                   title='Top 10 Most Rated Movies')
     st.plotly_chart(fig4)
 
-    # 🎯 Top 10 by Rating and Genre
+    # Top 10 by Rating and Genre
     st.subheader("🎯 Top 10 Movies by Rating and Genre")
     rating_options = sorted(df['Rating'].unique(), reverse=True)
     selected_rating = st.selectbox("Select Rating:", rating_options)
@@ -136,25 +136,25 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
         unsafe_allow_html=True
     )
 
-    # 📥 Leitura e limpeza dos dados
+    # Leitura e limpeza dos dados
     df = pd.read_csv("Bakery_sales_clean.csv")
     df['unit_price'] = df['unit_price'].str.replace('€', '', regex=False).str.replace(',', '.', regex=False).str.strip().astype(float)
     df['ticket_number'] = df['ticket_number'].astype(str)
     df['Revenue'] = df['Quantity'] * df['unit_price']
 
-    # 📦 Transações
+    # Transações
     transactions = df.groupby('ticket_number')['article'].apply(list).tolist()
     te = TransactionEncoder()
     te_array = te.fit(transactions).transform(transactions)
     df_encoded = pd.DataFrame(te_array, columns=te.columns_)
 
-    # ⚙️ Apriori
+    #  Apriori
     start_apriori = time.time()
     frequent_itemsets_apriori = apriori(df_encoded, min_support=0.01, use_colnames=True)
     rules_apriori = association_rules(frequent_itemsets_apriori, metric="confidence", min_threshold=0.4)
     apriori_time = round(time.time() - start_apriori, 2)
 
-    # ⚙️ FP-Growth
+    #  FP-Growth
     start_fpgrowth = time.time()
     frequent_itemsets_fpgrowth = fpgrowth(df_encoded, min_support=0.01, use_colnames=True)
     rules_fpgrowth = association_rules(frequent_itemsets_fpgrowth, metric="confidence", min_threshold=0.4)
@@ -167,14 +167,14 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
                   labels={"x": "Quantity Sold", "y": "Product"})
     st.plotly_chart(fig1, use_container_width=True)
 
-    # 💰 Receita por produto
+    #  Receita por produto
     st.subheader("💰 Top 10 Revenue Generating Items")
     revenue = df.groupby('article')['Revenue'].sum().sort_values(ascending=False).head(10)
     fig2 = px.bar(revenue, x=revenue.values, y=revenue.index, orientation='h',
                   labels={"x": "Total Revenue (€)", "y": "Product"})
     st.plotly_chart(fig2, use_container_width=True)
 
-    # 🧂🧁 Produtos por preço médio com seletor
+    #  Produtos por preço médio com seletor
     st.subheader("💸 Product Prices – Cheapest vs Most Expensive")
     price_option = st.selectbox("Select view:", ["Cheapest Products", "Most Expensive Products"])
     avg_price = df.groupby('article')['unit_price'].mean().sort_values()
@@ -196,7 +196,7 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-    # 🔍 Regras de associação por produto e algoritmo
+    # Regras de associação por produto e algoritmo
     st.subheader("🔍 Explore Rules by Product and Algorithm")
     algorithm_option = st.selectbox("Select algorithm:", ["Apriori", "FP-Growth"])
     rules = rules_apriori if algorithm_option == "Apriori" else rules_fpgrowth
@@ -211,7 +211,7 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
     filtered["antecedents"] = filtered["antecedents"].apply(lambda x: ', '.join(list(x)))
     filtered["consequents"] = filtered["consequents"].apply(lambda x: ', '.join(list(x)))
 
-    # 🧠 Adiciona interpretação automática
+    # Adiciona interpretação automática
     def interpret_rule(row):
         return f"Customers who buy {row['antecedents']} are likely to also buy {row['consequents']}"
 
@@ -235,7 +235,7 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
     else:
         st.info("No rules found for this product using this algorithm.")
 
-    # ⏱️ Comparação do tempo de execução
+    # Comparação do tempo de execução
     st.subheader("⏱️ Execution Time Comparison")
     time_df = pd.DataFrame({
         "Algorithm": ["Apriori", "FP-Growth"],
