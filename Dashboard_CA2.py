@@ -15,10 +15,8 @@ os.chdir(script_dir)
 
 st.set_page_config(page_title="CA2 Dashboard", layout="wide")
 
-# === Navegação ===
 menu = st.sidebar.radio("📌 Select Task", ["🎬 Task 1: MovieLens", "🧺 Task 2: Bakery Market Basket"])
 
-# === TAREFA 1 ===
 if menu == "🎬 Task 1: MovieLens":
     st.markdown(
         """
@@ -31,7 +29,7 @@ if menu == "🎬 Task 1: MovieLens":
     )
     df = pd.read_csv("movielens_merged.csv")
 
-    # 📊 Gender
+    # Gender
     st.subheader("📊 Gender Distribution")
     gender_count = df['Gender'].value_counts().reset_index()
     gender_count.columns = ['Gender', 'Count']
@@ -57,7 +55,7 @@ if menu == "🎬 Task 1: MovieLens":
     fig2 = px.histogram(df, x='Age', nbins=10, title='User Age Distribution')
     st.plotly_chart(fig2)
 
-    # ⭐ Ratings
+    # Ratings
     st.subheader("⭐ Rating Distribution")
     fig3 = px.histogram(df, x='Rating', nbins=5, title='Movie Ratings')
     st.plotly_chart(fig3)
@@ -89,7 +87,7 @@ if menu == "🎬 Task 1: MovieLens":
     else:
         st.warning("No movies found with this combination of rating and genre.")
 
-    # 🎬 Content-Based Filtering
+    # Content-Based Filtering
     st.subheader("🎬 Content-Based Filtering (Genres + TF-IDF)")
     st.markdown("Use the dropdown or type to get 5 similar recommendations.")
 
@@ -124,7 +122,6 @@ if menu == "🎬 Task 1: MovieLens":
         st.markdown(f"### 🍿 Top 5 Similar Movies to **{title_to_use}**")
         st.dataframe(recs.reset_index(drop=True))
 
-# === TAREFA 2 ===
 elif menu == "🧺 Task 2: Bakery Market Basket":
     st.markdown(
         """
@@ -136,13 +133,12 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
         unsafe_allow_html=True
     )
 
-    # Leitura e limpeza dos dados
     df = pd.read_csv("Bakery_sales_clean.csv")
     df['unit_price'] = df['unit_price'].str.replace('€', '', regex=False).str.replace(',', '.', regex=False).str.strip().astype(float)
     df['ticket_number'] = df['ticket_number'].astype(str)
     df['Revenue'] = df['Quantity'] * df['unit_price']
 
-    # Transações
+    # Ttransaction
     transactions = df.groupby('ticket_number')['article'].apply(list).tolist()
     te = TransactionEncoder()
     te_array = te.fit(transactions).transform(transactions)
@@ -160,21 +156,21 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
     rules_fpgrowth = association_rules(frequent_itemsets_fpgrowth, metric="confidence", min_threshold=0.4)
     fpgrowth_time = round(time.time() - start_fpgrowth, 2)
 
-    # 📊 Itens mais vendidos
+    # Most sold items
     st.subheader("🍞 Top 10 Most Sold Items")
     most_sold = df.groupby('article')['Quantity'].sum().sort_values(ascending=False).head(10)
     fig1 = px.bar(most_sold, x=most_sold.values, y=most_sold.index, orientation='h',
                   labels={"x": "Quantity Sold", "y": "Product"})
     st.plotly_chart(fig1, use_container_width=True)
 
-    #  Receita por produto
+    #  Top 10 Revenue Generating Items
     st.subheader("💰 Top 10 Revenue Generating Items")
     revenue = df.groupby('article')['Revenue'].sum().sort_values(ascending=False).head(10)
     fig2 = px.bar(revenue, x=revenue.values, y=revenue.index, orientation='h',
                   labels={"x": "Total Revenue (€)", "y": "Product"})
     st.plotly_chart(fig2, use_container_width=True)
 
-    #  Produtos por preço médio com seletor
+    #  Cheapest vs Most Expensive Products
     st.subheader("💸 Product Prices – Cheapest vs Most Expensive")
     price_option = st.selectbox("Select view:", ["Cheapest Products", "Most Expensive Products"])
     avg_price = df.groupby('article')['unit_price'].mean().sort_values()
@@ -196,7 +192,7 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-    # Regras de associação por produto e algoritmo
+    # Rules by Product and Algorithm
     st.subheader("🔍 Explore Rules by Product and Algorithm")
     algorithm_option = st.selectbox("Select algorithm:", ["Apriori", "FP-Growth"])
     rules = rules_apriori if algorithm_option == "Apriori" else rules_fpgrowth
@@ -211,7 +207,6 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
     filtered["antecedents"] = filtered["antecedents"].apply(lambda x: ', '.join(list(x)))
     filtered["consequents"] = filtered["consequents"].apply(lambda x: ', '.join(list(x)))
 
-    # Adiciona interpretação automática
     def interpret_rule(row):
         return f"Customers who buy {row['antecedents']} are likely to also buy {row['consequents']}"
 
@@ -235,7 +230,7 @@ elif menu == "🧺 Task 2: Bakery Market Basket":
     else:
         st.info("No rules found for this product using this algorithm.")
 
-    # Comparação do tempo de execução
+    # Time Comparison
     st.subheader("⏱️ Execution Time Comparison")
     time_df = pd.DataFrame({
         "Algorithm": ["Apriori", "FP-Growth"],
